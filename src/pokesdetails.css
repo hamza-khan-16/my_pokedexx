@@ -1,0 +1,72 @@
+.pokemon-details-container {
+    display: flex;
+    flex-direction: row; 
+    height: 100vh;
+    overflow: hidden; 
+}
+  
+ 
+  .pokemon-image-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    background-color: #f4f4f4; 
+  }
+  
+  .pokemon-image {
+    max-width: 100%;
+    height: auto;
+  }
+  
+
+  .pokemon-info-container {
+      text-transform: capitalize;
+    flex: 1.5;
+    padding: 20px;
+    overflow-y: auto;
+    max-height: 100vh;
+    background-color: white;
+  }
+  
+
+  .moves-list {
+    font-weight: bold;
+    color: #ffcc00;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  
+ 
+  .stats-list {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+ 
+  @media screen and (max-width: 768px) {
+    .pokemon-details-container {
+      flex-direction: column; 
+      height: auto;
+    }
+  
+    .pokemon-image-container {
+      position: static; 
+      height: auto;
+      padding: 20px;
+    }
+  
+    .pokemon-info-container {
+      max-height: none;
+      overflow-y: visible;
+    }
+  }
+  
+  .stats-list{
+    text-transform: capitalize;
+  }
+
+  
