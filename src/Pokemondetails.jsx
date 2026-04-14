@@ -76,6 +76,8 @@ const PokemonDetails = () => {
     window.speechSynthesis.speak(utter);
   }, []);
 
+  useEffect(() => { window.scrollTo(0, 0); }, [id]);
+
   useEffect(() => { return () => { window.speechSynthesis?.cancel(); setIsSpeaking(false); }; }, [id]);
 
   useEffect(() => {
