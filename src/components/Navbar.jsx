@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useRef } from 'react'
 import { Link } from 'react-router-dom'
 
 const REGIONS = ['Kanto', 'Johto', 'Hoenn', 'Sinnoh', 'Unova', 'Kalos', 'Alola', 'Galar', 'Paldea'];
@@ -17,10 +17,13 @@ const TYPE_COLORS = {
   Fairy: '#ef70ef', Normal: '#9099a1',
 };
 
-export default function Navbar({ onRegionSelect, onTypeSelect, onClearFilter, activeFilter }) {
+export default function Navbar({ onRegionSelect, onTypeSelect, onClearFilter, activeFilter, searchTerm, onSearch }) {
+  const inputRef = useRef(null);
+
   return (
     <nav className="navbar navbar-expand-lg">
       <div className="container-fluid">
+
         <Link
           className="navbar-brand"
           to="/"
@@ -49,6 +52,8 @@ export default function Navbar({ onRegionSelect, onTypeSelect, onClearFilter, ac
         </button>
 
         <div className="collapse navbar-collapse" id="navbarSupportedContent">
+
+          {/* Left: filter dropdowns */}
           <ul className="navbar-nav me-auto mb-2 mb-lg-0">
 
             <li className="nav-item dropdown">
@@ -97,10 +102,7 @@ export default function Navbar({ onRegionSelect, onTypeSelect, onClearFilter, ac
                       onClick={(e) => { e.preventDefault(); onTypeSelect && onTypeSelect(type); }}
                       style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
                     >
-                      <span
-                        className="type-dot"
-                        style={{ backgroundColor: TYPE_COLORS[type] }}
-                      />
+                      <span className="type-dot" style={{ backgroundColor: TYPE_COLORS[type] }} />
                       {type}
                     </a>
                   </li>
@@ -121,6 +123,33 @@ export default function Navbar({ onRegionSelect, onTypeSelect, onClearFilter, ac
             )}
 
           </ul>
+
+          {/* Right: search bar */}
+          <div className="search-wrapper">
+            <span className="search-icon">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+            </span>
+            <input
+              ref={inputRef}
+              type="text"
+              className="search-input"
+              placeholder="Search Pokémon..."
+              value={searchTerm}
+              onChange={(e) => onSearch && onSearch(e.target.value)}
+            />
+            {searchTerm && (
+              <button
+                className="search-clear"
+                onClick={() => { onSearch && onSearch(''); inputRef.current?.focus(); }}
+                aria-label="Clear search"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+
         </div>
       </div>
     </nav>

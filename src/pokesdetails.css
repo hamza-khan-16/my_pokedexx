@@ -1,72 +1,551 @@
-.pokemon-details-container {
-    display: flex;
-    flex-direction: row; 
-    height: 100vh;
-    overflow: hidden; 
+.detail-page {
+  display: flex;
+  flex-direction: row;
+  min-height: calc(100vh - 56px);
+  background: #0f0f1a;
 }
-  
- 
-  .pokemon-image-container {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: sticky;
-    top: 0;
-    height: 100vh;
-    background-color: #f4f4f4; 
+
+/* ─── Left Panel ─────────────────────────────────────────── */
+.detail-left {
+  width: 360px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem 1.5rem 3rem;
+  position: sticky;
+  top: 56px;
+  height: calc(100vh - 56px);
+  overflow: hidden;
+}
+
+.back-btn {
+  align-self: flex-start;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #ccc;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  margin-bottom: 1rem;
+}
+
+.back-btn:hover {
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+}
+
+.detail-number {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.25);
+  letter-spacing: 2px;
+  margin-bottom: 0.5rem;
+}
+
+.detail-artwork {
+  width: 240px;
+  height: 240px;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 24px rgba(0,0,0,0.6));
+  animation: detail-float 3s ease-in-out infinite;
+}
+
+@keyframes detail-float {
+  0%   { transform: translateY(0px); }
+  50%  { transform: translateY(-12px); }
+  100% { transform: translateY(0px); }
+}
+
+.detail-name {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #fff;
+  text-transform: capitalize;
+  margin: 1rem 0 0.6rem;
+  text-align: center;
+}
+
+.detail-types {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.detail-type-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: capitalize;
+  letter-spacing: 0.8px;
+  padding: 4px 14px;
+  border-radius: 20px;
+  color: #fff;
+}
+
+.detail-meta {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 16px;
+  padding: 1rem 1.5rem;
+  width: 100%;
+  justify-content: center;
+}
+
+.detail-meta-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.meta-label {
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.4);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.meta-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.detail-meta-divider {
+  width: 1px;
+  height: 36px;
+  background: rgba(255,255,255,0.12);
+}
+
+/* ─── Right Panel ────────────────────────────────────────── */
+.detail-right {
+  flex: 1;
+  padding: 2.5rem 3rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+.detail-section {}
+
+.section-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.5);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+
+/* ─── Abilities ──────────────────────────────────────────── */
+.ability-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.ability-badge {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: #e0e0ff;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  text-transform: capitalize;
+  font-weight: 500;
+}
+
+.ability-badge.hidden {
+  border-style: dashed;
+  color: #a0a0c0;
+}
+
+.ability-badge em {
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+
+/* ─── Stats ──────────────────────────────────────────────── */
+.stats-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.stat-row {
+  display: grid;
+  grid-template-columns: 140px 44px 1fr;
+  align-items: center;
+  gap: 1rem;
+}
+
+.stat-label {
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.5);
+  text-transform: capitalize;
+  font-weight: 500;
+}
+
+.stat-value {
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-align: right;
+}
+
+.stat-bar-bg {
+  height: 8px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.stat-bar-fill {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 0.8s ease;
+}
+
+/* ─── Moves ──────────────────────────────────────────────── */
+.moves-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.move-chip {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #b0b0d0;
+  padding: 4px 12px;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  text-transform: capitalize;
+  transition: background 0.15s, color 0.15s;
+}
+
+.move-chip:hover {
+  background: rgba(220, 50, 50, 0.15);
+  border-color: rgba(220, 50, 50, 0.3);
+  color: #ff9090;
+}
+
+/* ─── Special badge ──────────────────────────────────────── */
+.special-badge {
+  background: linear-gradient(135deg, #f5c518, #e8a000);
+  color: #1a1a00;
+  font-size: 0.78rem;
+  font-weight: 800;
+  padding: 4px 14px;
+  border-radius: 20px;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.8rem;
+}
+
+/* ─── Info grid (Training / Breeding) ───────────────────── */
+.info-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.info-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.info-label {
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.45);
+  font-weight: 500;
+  text-transform: capitalize;
+  min-width: 130px;
+}
+
+.info-value {
+  font-size: 0.9rem;
+  color: #e0e0ff;
+  font-weight: 600;
+}
+
+.info-value.capitalize {
+  text-transform: capitalize;
+}
+
+.capitalize {
+  text-transform: capitalize;
+}
+
+/* ─── Gender bar ─────────────────────────────────────────── */
+.gender-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  justify-content: flex-end;
+}
+
+.gender-m { color: #7eb8f7; font-size: 0.82rem; font-weight: 600; white-space: nowrap; }
+.gender-f { color: #f78eb8; font-size: 0.82rem; font-weight: 600; white-space: nowrap; }
+
+.gender-bar {
+  flex: 1;
+  height: 7px;
+  border-radius: 99px;
+  overflow: hidden;
+  display: flex;
+  max-width: 100px;
+}
+
+.gender-bar-male   { background: #7eb8f7; height: 100%; }
+.gender-bar-female { background: #f78eb8; height: 100%; }
+
+/* ─── Stats total row ────────────────────────────────────── */
+.total-row { margin-top: 4px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 6px; }
+.total-value { color: #fff !important; font-size: 1rem !important; }
+
+/* ─── Evolution chain ────────────────────────────────────── */
+.evo-chain {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.evo-arrow {
+  color: rgba(255,255,255,0.3);
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+
+.evo-stage {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.evo-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 10px 14px;
+  text-decoration: none;
+  transition: background 0.2s, border-color 0.2s, transform 0.2s;
+  min-width: 80px;
+}
+
+.evo-card:hover {
+  background: rgba(220,50,50,0.15);
+  border-color: rgba(220,50,50,0.3);
+  transform: translateY(-3px);
+}
+
+.evo-card.evo-current {
+  border-color: rgba(220,50,50,0.5);
+  background: rgba(220,50,50,0.15);
+}
+
+.evo-img {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+}
+
+.evo-name {
+  font-size: 0.78rem;
+  color: #e0e0ff;
+  text-transform: capitalize;
+  font-weight: 600;
+}
+
+.evo-num {
+  font-size: 0.68rem;
+  color: rgba(255,255,255,0.3);
+}
+
+/* ─── Sprite gallery ─────────────────────────────────────── */
+.sprite-gallery {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.sprite-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.sprite-img {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.sprite-label {
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ─── Shiny preview (left panel) ────────────────────────── */
+.shiny-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin-top: 0.8rem;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,200,0.12);
+  border-radius: 12px;
+  padding: 0.7rem 1rem;
+  width: 100%;
+}
+
+.shiny-label {
+  font-size: 0.7rem;
+  color: rgba(255,255,200,0.5);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.shiny-img {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+}
+
+/* ─── Description + Voice ────────────────────────────────── */
+.detail-description {
+  margin-top: 1.2rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 14px;
+  padding: 1rem 1.1rem;
+  width: 100%;
+}
+
+.description-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.6rem;
+}
+
+.description-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.35);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+.speak-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.6);
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+  flex-shrink: 0;
+}
+
+.speak-btn:hover {
+  background: rgba(220, 50, 50, 0.2);
+  border-color: rgba(220, 50, 50, 0.4);
+  color: #ff6b6b;
+}
+
+.speak-btn.speaking {
+  background: rgba(220, 50, 50, 0.25);
+  border-color: rgba(220, 50, 50, 0.5);
+  color: #ff6b6b;
+  animation: pulse-ring 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-ring {
+  0%   { box-shadow: 0 0 0 0 rgba(220, 50, 50, 0.4); }
+  70%  { box-shadow: 0 0 0 8px rgba(220, 50, 50, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(220, 50, 50, 0); }
+}
+
+.speak-waves {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 14px;
+}
+
+.speak-waves span {
+  display: block;
+  width: 3px;
+  background: #ff6b6b;
+  border-radius: 2px;
+  animation: wave-bar 0.8s ease-in-out infinite;
+}
+
+.speak-waves span:nth-child(1) { height: 6px;  animation-delay: 0s; }
+.speak-waves span:nth-child(2) { height: 12px; animation-delay: 0.15s; }
+.speak-waves span:nth-child(3) { height: 6px;  animation-delay: 0.3s; }
+
+@keyframes wave-bar {
+  0%, 100% { transform: scaleY(1); }
+  50%       { transform: scaleY(1.8); }
+}
+
+.description-text {
+  font-size: 0.88rem;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.6;
+  font-style: italic;
+}
+
+/* ─── Responsive ─────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .detail-page {
+    flex-direction: column;
   }
-  
-  .pokemon-image {
-    max-width: 100%;
+
+  .detail-left {
+    width: 100%;
+    position: static;
     height: auto;
-  }
-  
-
-  .pokemon-info-container {
-      text-transform: capitalize;
-    flex: 1.5;
-    padding: 20px;
-    overflow-y: auto;
-    max-height: 100vh;
-    background-color: white;
-  }
-  
-
-  .moves-list {
-    font-weight: bold;
-    color: #ffcc00;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-  }
-  
- 
-  .stats-list {
-    list-style-type: none;
-    padding: 0;
-  }
-  
- 
-  @media screen and (max-width: 768px) {
-    .pokemon-details-container {
-      flex-direction: column; 
-      height: auto;
-    }
-  
-    .pokemon-image-container {
-      position: static; 
-      height: auto;
-      padding: 20px;
-    }
-  
-    .pokemon-info-container {
-      max-height: none;
-      overflow-y: visible;
-    }
-  }
-  
-  .stats-list{
-    text-transform: capitalize;
+    padding: 2rem 1.5rem 1.5rem;
   }
 
-  
+  .detail-right {
+    padding: 1.5rem;
+  }
+
+  .stat-row {
+    grid-template-columns: 120px 36px 1fr;
+  }
+}

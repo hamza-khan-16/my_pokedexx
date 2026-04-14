@@ -32,8 +32,10 @@ function App() {
   const [initialLoading, setInitialLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState({ kind: 'all', label: 'All' });
   const [totalCount, setTotalCount] = useState(0);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const filteredListRef = useRef([]);
+  const baseListRef = useRef([]);      // list after region/type filter, before search
   const batchStartRef = useRef(0);
   const batchLoadingRef = useRef(false);
   const sentinelRef = useRef(null);
@@ -62,14 +64,18 @@ function App() {
     setBatchLoading(false);
   }, []);
 
-  const applyFilter = useCallback(async (newList, filterObj) => {
+  const applyFilter = useCallback(async (newList, filterObj, search = '') => {
+    const searchFiltered = search
+      ? newList.filter(p => p.name.includes(search.toLowerCase().trim()))
+      : newList;
+
     setActiveFilter(filterObj);
-    filteredListRef.current = newList;
+    filteredListRef.current = searchFiltered;
     batchStartRef.current = 0;
     setLoadedData([]);
-    setTotalCount(newList.length);
+    setTotalCount(searchFiltered.length);
 
-    const batch = newList.slice(0, BATCH_SIZE);
+    const batch = searchFiltered.slice(0, BATCH_SIZE);
     batchLoadingRef.current = true;
     setBatchLoading(true);
     try {
@@ -91,6 +97,7 @@ function App() {
       .then(json => {
         const list = json.results;
         setAllPoke(list);
+        baseListRef.current = list;
         filteredListRef.current = list;
         setTotalCount(list.length);
         setInitialLoading(false);
@@ -105,7 +112,9 @@ function App() {
       const id = getIdFromUrl(p.url);
       return id >= min && id <= max;
     });
-    applyFilter(filtered, { kind: 'region', label: region });
+    baseListRef.current = filtered;
+    setSearchTerm('');
+    applyFilter(filtered, { kind: 'region', label: region }, '');
   }, [allPoke, applyFilter]);
 
   const handleTypeSelect = useCallback(async (type) => {
@@ -115,8 +124,10 @@ function App() {
       const data = await res.json();
       const typeNames = new Set(data.pokemon.map(p => p.pokemon.name));
       const filtered = allPoke.filter(p => typeNames.has(p.name));
+      baseListRef.current = filtered;
+      setSearchTerm('');
       setInitialLoading(false);
-      applyFilter(filtered, { kind: 'type', label: type });
+      applyFilter(filtered, { kind: 'type', label: type }, '');
     } catch (err) {
       console.error(err);
       setInitialLoading(false);
@@ -124,8 +135,36 @@ function App() {
   }, [allPoke, applyFilter]);
 
   const handleClearFilter = useCallback(() => {
-    applyFilter(allPoke, { kind: 'all', label: 'All' });
+    baseListRef.current = allPoke;
+    setSearchTerm('');
+    applyFilter(allPoke, { kind: 'all', label: 'All' }, '');
   }, [allPoke, applyFilter]);
+
+  const handleSearch = useCallback((term) => {
+    setSearchTerm(term);
+    const searchFiltered = term
+      ? baseListRef.current.filter(p => p.name.includes(term.toLowerCase().trim()))
+      : baseListRef.current;
+
+    filteredListRef.current = searchFiltered;
+    batchStartRef.current = 0;
+    setLoadedData([]);
+    setTotalCount(searchFiltered.length);
+
+    const batch = searchFiltered.slice(0, BATCH_SIZE);
+    batchLoadingRef.current = true;
+    setBatchLoading(true);
+    Promise.all(batch.map(p => fetch(p.url).then(r => r.json())))
+      .then(results => {
+        setLoadedData(results);
+        batchStartRef.current = BATCH_SIZE;
+      })
+      .catch(err => console.error(err))
+      .finally(() => {
+        batchLoadingRef.current = false;
+        setBatchLoading(false);
+      });
+  }, []);
 
   useEffect(() => {
     const sentinel = sentinelRef.current;
@@ -139,6 +178,17 @@ function App() {
   }, [loadNextBatch, initialLoading]);
 
   const hasMore = batchStartRef.current < filteredListRef.current.length;
+
+  const subtitleText = () => {
+    const base = activeFilter.kind === 'region'
+      ? `${activeFilter.label} Region`
+      : activeFilter.kind === 'type'
+      ? `${activeFilter.label} Type`
+      : 'All Pokémon';
+    return searchTerm
+      ? `${totalCount} result${totalCount !== 1 ? 's' : ''} for "${searchTerm}" in ${base}`
+      : `${base} · ${totalCount} Pokémon`;
+  };
 
   if (initialLoading) {
     return (
@@ -156,6 +206,8 @@ function App() {
         onTypeSelect={handleTypeSelect}
         onClearFilter={handleClearFilter}
         activeFilter={activeFilter}
+        searchTerm={searchTerm}
+        onSearch={handleSearch}
       />
       <Routes>
         <Route
@@ -164,28 +216,33 @@ function App() {
             <div className="page-wrapper">
               <div className="page-header">
                 <h1 className="page-title">Pokédex</h1>
-                <p className="page-subtitle">
-                  {activeFilter.kind === 'all'
-                    ? `All ${totalCount} Pokémon`
-                    : activeFilter.kind === 'region'
-                    ? `${activeFilter.label} Region · ${totalCount} Pokémon`
-                    : `${activeFilter.label} Type · ${totalCount} Pokémon`}
-                </p>
+                <p className="page-subtitle">{subtitleText()}</p>
               </div>
-              <div className="parent">
-                {loadedData.map((pokemon) => (
-                  <Card
-                    key={pokemon.id}
-                    index={pokemon.id}
-                    title={pokemon.name}
-                    imageUrl={
-                      pokemon.sprites.other['official-artwork'].front_default ||
-                      './default.jpg'
-                    }
-                    types={pokemon.types}
-                  />
-                ))}
-              </div>
+
+              {loadedData.length === 0 && !batchLoading ? (
+                <div className="no-results">
+                  <span className="no-results-icon">🔍</span>
+                  <p>No Pokémon found for <strong>"{searchTerm}"</strong></p>
+                  <button className="clear-search-btn" onClick={() => handleSearch('')}>
+                    Clear search
+                  </button>
+                </div>
+              ) : (
+                <div className="parent">
+                  {loadedData.map((pokemon) => (
+                    <Card
+                      key={pokemon.id}
+                      index={pokemon.id}
+                      title={pokemon.name}
+                      imageUrl={
+                        pokemon.sprites.other['official-artwork'].front_default ||
+                        './default.jpg'
+                      }
+                      types={pokemon.types}
+                    />
+                  ))}
+                </div>
+              )}
 
               {hasMore && (
                 <div ref={sentinelRef} className="scroll-sentinel">
@@ -199,7 +256,11 @@ function App() {
               )}
 
               {!hasMore && loadedData.length > 0 && (
-                <p className="end-message">You've seen them all! {loadedData.length} Pokémon loaded.</p>
+                <p className="end-message">
+                  {searchTerm
+                    ? `${loadedData.length} Pokémon matched`
+                    : `You've seen them all! ${loadedData.length} Pokémon loaded.`}
+                </p>
               )}
             </div>
           }
