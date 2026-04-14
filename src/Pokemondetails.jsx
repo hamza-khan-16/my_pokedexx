@@ -61,6 +61,8 @@ const PokemonDetails = () => {
   const [species, setSpecies] = useState(null);
   const [evolution, setEvolution] = useState(null);
   const [loading, setloading] = useState(true);
+  const [error, setError] = useState(null);
+  const [imgError, setImgError] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const utteranceRef = useRef(null);
 
@@ -81,31 +83,43 @@ const PokemonDetails = () => {
   useEffect(() => { return () => { window.speechSynthesis?.cancel(); setIsSpeaking(false); }; }, [id]);
 
   useEffect(() => {
-    setloading(true); setPokemon(null); setSpecies(null); setEvolution(null);
+    setloading(true); setPokemon(null); setSpecies(null); setEvolution(null); setError(null); setImgError(false);
     window.speechSynthesis?.cancel();
 
     const fetchAll = async () => {
       try {
-        const [pokeRes, speciesRes] = await Promise.all([
-          fetch(`https://pokeapi.co/api/v2/pokemon/${id}`),
-          fetch(`https://pokeapi.co/api/v2/pokemon-species/${id}`),
-        ]);
+        const pokeRes = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
+        if (!pokeRes.ok) {
+          setError(`No Pokémon found for "${id}".`);
+          setloading(false);
+          return;
+        }
         const pokeData = await pokeRes.json();
-        const speciesData = await speciesRes.json();
         setPokemon(pokeData);
-        setSpecies(speciesData);
         setloading(false);
 
-        const desc = getDescription(speciesData);
-        if (desc) speak(`${pokeData.name}. ${desc}`);
-
-        if (speciesData.evolution_chain?.url) {
-          const evoRes = await fetch(speciesData.evolution_chain.url);
-          const evoData = await evoRes.json();
-          setEvolution(parseEvolutionChain(evoData.chain));
+        // Use the species URL embedded in the Pokémon data — handles megas/forms correctly
+        const speciesUrl = pokeData.species?.url;
+        if (speciesUrl) {
+          const speciesRes = await fetch(speciesUrl);
+          if (speciesRes.ok) {
+            const speciesData = await speciesRes.json();
+            setSpecies(speciesData);
+            const desc = getDescription(speciesData);
+            if (desc) speak(`${pokeData.name}. ${desc}`);
+            if (speciesData.evolution_chain?.url) {
+              const evoRes = await fetch(speciesData.evolution_chain.url);
+              if (evoRes.ok) {
+                const evoData = await evoRes.json();
+                setEvolution(parseEvolutionChain(evoData.chain));
+              }
+            }
+          }
         }
       } catch (err) {
-        console.error(err); setloading(false);
+        console.error(err);
+        setError('Failed to load Pokémon data. Please try again.');
+        setloading(false);
       }
     };
     fetchAll();
@@ -123,6 +137,15 @@ const PokemonDetails = () => {
       <div className="loader-container">
         <img src={loader} alt="Loading..." className="loader" />
         <p className="loader-text">Loading...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="loader-container">
+        <p className="loader-text" style={{ color: '#ff6b6b', fontSize: '1rem' }}>{error}</p>
+        <button className="back-btn" style={{ marginTop: '1rem' }} onClick={() => navigate(-1)}>← Back</button>
       </div>
     );
   }
@@ -163,11 +186,22 @@ const PokemonDetails = () => {
 
         <div className="detail-number">#{String(pokemon.id).padStart(3, '0')}</div>
 
-        <img
-          className="detail-artwork"
-          src={pokemon?.sprites?.other?.['official-artwork']?.front_default || pokemon?.sprites?.front_default || './default.jpg'}
-          alt={pokemon.name}
-        />
+        {!imgError && (pokemon?.sprites?.other?.['official-artwork']?.front_default || pokemon?.sprites?.front_default) ? (
+          <img
+            className="detail-artwork"
+            src={pokemon?.sprites?.other?.['official-artwork']?.front_default || pokemon?.sprites?.front_default}
+            alt={pokemon.name}
+            onError={() => setImgError(true)}
+          />
+        ) : (
+          <div className="detail-artwork-placeholder" style={{ borderColor: primaryColor, boxShadow: `0 0 40px ${primaryColor}55` }}>
+            <div className="placeholder-ball" style={{ background: `linear-gradient(to bottom, ${primaryColor} 50%, #fff 50%)` }}>
+              <div className="placeholder-band" />
+              <div className="placeholder-center" />
+            </div>
+            <span className="placeholder-label">{pokemon.name}</span>
+          </div>
+        )}
 
         <h1 className="detail-name">{pokemon.name}</h1>
 
