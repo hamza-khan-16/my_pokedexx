@@ -38,7 +38,7 @@ function App() {
   const baseListRef = useRef([]);      // list after region/type filter, before search
   const batchStartRef = useRef(0);
   const batchLoadingRef = useRef(false);
-  const sentinelRef = useRef(null);
+  const observerRef = useRef(null);
 
   const loadNextBatch = useCallback(async () => {
     if (batchLoadingRef.current) return;
@@ -166,16 +166,20 @@ function App() {
       });
   }, []);
 
-  useEffect(() => {
-    const sentinel = sentinelRef.current;
-    if (!sentinel) return;
-    const observer = new IntersectionObserver(
-      (entries) => { if (entries[0].isIntersecting) loadNextBatch(); },
-      { threshold: 0.1 }
-    );
-    observer.observe(sentinel);
-    return () => observer.disconnect();
-  }, [loadNextBatch, initialLoading]);
+  const sentinelRef = useCallback((node) => {
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+      observerRef.current = null;
+    }
+    if (node) {
+      const observer = new IntersectionObserver(
+        (entries) => { if (entries[0].isIntersecting) loadNextBatch(); },
+        { threshold: 0.1 }
+      );
+      observer.observe(node);
+      observerRef.current = observer;
+    }
+  }, [loadNextBatch]);
 
   const hasMore = batchStartRef.current < filteredListRef.current.length;
 
