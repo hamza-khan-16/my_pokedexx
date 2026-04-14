@@ -35,7 +35,7 @@ function App() {
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredListRef = useRef([]);
-  const baseListRef = useRef([]);      // list after region/type filter, before search
+  const baseListRef = useRef([]);     
   const batchStartRef = useRef(0);
   const batchLoadingRef = useRef(false);
   const observerRef = useRef(null);
@@ -240,7 +240,7 @@ function App() {
                       title={pokemon.name}
                       imageUrl={
                         pokemon.sprites.other['official-artwork'].front_default ||
-                        './default.jpg'
+                        './pokeballl.png'
                       }
                       types={pokemon.types}
                     />
